@@ -3,17 +3,20 @@ class User {
     this.username = username;
     this.password = password;
     this.age = age;
-    let loggedIn = false;
+    this.loggedIn = false;
   }
   login(password) {
-    if (password === this.password) {
-      loggedIn = true;
+    if (this.password === password) {
+      this.loggedIn = true;
+      console.log("User logged in");
     } else {
-      throw new Error("incorrect password");
+      throw new Error("Incorrect password");
     }
   }
+
   logout() {
-    loggedIn = false;
+    this.loggedIn = false;
+    console.log("User logged out");
   }
 }
 

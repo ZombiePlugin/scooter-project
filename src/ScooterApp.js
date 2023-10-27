@@ -3,61 +3,63 @@ const Scooter = require("./Scooter");
 
 class ScooterApp {
   constructor() {
-    const stations = { Paddington: [], Wembley: [], Battersea: [] };
-    const registeredUsers = {};
+    this.stations = { Paddington: [], Wembley: [], Battersea: [] };
+    this.registeredUsers = {};
   }
   registerUser(username, password, age) {
-    if (username in this.registeredUsers === false && age >= 18) {
-      this.registeredUsers[username] = new User(username, password, age);
-      console.log("user has been registered");
-      return this.registeredUsers[username];
-    } else {
-      throw new Error("already registered or too young to register");
+    if (this.registeredUsers[username]) {
+      throw new Error("User already registered");
     }
+
+    if (age < 18) {
+      throw new Error("Too young to register");
+    }
+
+    const user = new User(username, password, age);
+    this.registeredUsers[username] = user;
+    return user;
   }
   loginUser(username, password) {
-    if (
-      username in this.registeredUsers === false ||
-      this.registeredUsers[username] != password
-    ) {
-      throw new Error("username or password is incorrect");
-    } else {
-      this.registeredUsers[username].login(password);
-      console.log("user has been logged in");
+    const user = this.registeredUsers[username];
+    if (!user) {
+      throw new Error("Username or password is incorrect");
     }
+    user.login(password);
   }
+
   logoutUser(username) {
-    if (username in this.registeredUsers) {
-      this.registeredUsers[username].logout;
-      console.log("user is logged out");
-    } else {
-      throw new Error("no such user is logged in");
+    const user = this.registeredUsers[username];
+    if (!user) {
+      throw new Error("No such user is logged in");
     }
+
+    user.logout();
   }
   createScooter(station) {
-    if (station in this.stations) {
-      new Scooter(station);
-      console.log("created new scooter");
-    } else {
-      throw new Error("no such station");
+    if (!this.stations[station]) {
+      throw new Error("No such station");
     }
+    const scooter = new Scooter(station);
+    this.stations[station].push(scooter);
+    console.log("Created new scooter");
+    return scooter;
   }
   dockScooter(scooter, station) {
-    if (station in this.stations != true) {
+    if (!this.stations[station]) {
       throw new Error("no such station");
-    } else if (scooter in this.stations[station]) {
-      throw new Error("scooter already at station");
-    } else {
-      stations[station].push(scooter);
-      scooter.dock();
-      console.log("scooter is docked");
     }
+    if (this.stations[station].includes(scooter)) {
+      throw new Error("scooter already at station");
+    }
+    this.stations[station].push(scooter);
+    scooter.dock(station);
+    console.log("scooter is docked");
   }
   rentScooter(scooter, user) {
-    for (const key in this.stations) {
-      for (let i = 0; i < stations[key].length; i++) {
-        if (stations[key][i] === scooter) {
-          stations[key].splice(i, 1);
+    for (const station in this.stations) {
+      for (let i = 0; i < this.stations[station].length; i++) {
+        if (this.stations[station][i] === scooter) {
+          this.stations[station].splice(i, 1);
           scooter.rent(user);
           return;
         }
@@ -66,10 +68,16 @@ class ScooterApp {
     throw new Error("scooter already rented");
   }
   print() {
-    console.log(this.registeredUsers);
-    console.log(this.stations);
-    for (key in this.stations) {
-      console.log(this.stations[key].length);
+    console.log("Registered Users:");
+    for (const username in this.registeredUsers) {
+      console.log(username);
+    }
+
+    console.log("Stations and Scooters:");
+    for (const station in this.stations) {
+      console.log(
+        station + " - " + this.stations[station].length + " scooters"
+      );
     }
   }
 }
